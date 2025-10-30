@@ -1,15 +1,24 @@
 {
   "name": "chill-wear-backend",
   "version": "1.0.0",
+  "description": "Backend API for Chill Wear e-commerce",
+  "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.18.0",
-    "mongoose": "^7.0.0",
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
     "cors": "^2.8.5",
     "multer": "^1.4.5",
-    "dotenv": "^16.0.0"
-  }
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["ecommerce", "clothing", "api"],
+  "author": "Chill Wear",
+  "license": "MIT"
 }
