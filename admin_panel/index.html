@@ -68,7 +68,7 @@
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // Simple authentication (in real app, this would be server-side)
+            // Simple authentication
             if (username === 'admin' && password === 'admin123') {
                 localStorage.setItem('adminAuthenticated', 'true');
                 window.location.href = 'dashboard.html';
