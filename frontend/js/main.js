@@ -40,7 +40,7 @@ class Cart {
                 id: product._id,
                 name: product.name,
                 price: product.price,
-                image: product.images[0],
+                image: product.images && product.images[0] ? product.images[0] : 'default.jpg',
                 size: size,
                 quantity: quantity
             });
@@ -149,31 +149,7 @@ class ProductGallery {
             dot.addEventListener('click', () => this.goToSlide(index));
         });
 
-        // Touch support for mobile
-        this.container.addEventListener('touchstart', this.handleTouchStart.bind(this));
-        this.container.addEventListener('touchmove', this.handleTouchMove.bind(this));
-
         this.updateDots();
-    }
-
-    handleTouchStart(e) {
-        this.touchStartX = e.touches[0].clientX;
-    }
-
-    handleTouchMove(e) {
-        if (!this.touchStartX) return;
-
-        const touchEndX = e.touches[0].clientX;
-        const diff = this.touchStartX - touchEndX;
-
-        if (Math.abs(diff) > 50) { // Minimum swipe distance
-            if (diff > 0) {
-                this.nextSlide();
-            } else {
-                this.prevSlide();
-            }
-            this.touchStartX = null;
-        }
     }
 
     goToSlide(index) {
@@ -204,23 +180,72 @@ class ApiService {
     static async fetchProducts() {
         try {
             const response = await fetch(`${API_BASE_URL}/products`);
-            if (!response.ok) throw new Error('Failed to fetch products');
+            if (!response.ok) {
+                // If API fails, use sample data
+                return this.getSampleProducts();
+            }
             return await response.json();
         } catch (error) {
             console.error('Error fetching products:', error);
-            return [];
+            // Return sample data if API is not available
+            return this.getSampleProducts();
         }
+    }
+
+    static getSampleProducts() {
+        return [
+            {
+                _id: '1',
+                name: 'BOSS Hoodie',
+                description: 'Premium BOSS hoodie with comfortable fit and iconic branding.',
+                price: 1299,
+                images: ['boss-hoodie.jpg'],
+                sizes: ['S', 'M', 'L', 'XL'],
+                category: 'hoodies',
+                featured: true
+            },
+            {
+                _id: '2',
+                name: 'Urban Denim Jacket',
+                description: 'Classic denim jacket with modern fit, perfect for layering.',
+                price: 1199,
+                images: ['denim-jacket.jpg'],
+                sizes: ['S', 'M', 'L', 'XL'],
+                category: 'jackets',
+                featured: true
+            },
+            {
+                _id: '3',
+                name: 'Premium Black Hoodie',
+                description: 'Our signature hoodie made with premium cotton blend for ultimate comfort.',
+                price: 899,
+                images: ['black-hoodie.jpg'],
+                sizes: ['S', 'M', 'L', 'XL'],
+                category: 'hoodies',
+                featured: true
+            },
+            {
+                _id: '4',
+                name: 'Classic White Tee',
+                description: 'Essential cotton t-shirt for everyday wear.',
+                price: 349,
+                images: ['white-tee.jpg'],
+                sizes: ['S', 'M', 'L', 'XL'],
+                category: 'tshirts',
+                featured: false
+            }
+        ];
     }
 
     static async fetchFeaturedProducts() {
         const products = await this.fetchProducts();
-        return products.filter(product => product.featured).slice(0, 6);
+        return products.filter(product => product.featured).slice(0, 4);
     }
 }
 
 // Product rendering
 class ProductRenderer {
-    static renderProduct(product, onAddToCart) {
+    static renderProduct(product) {
         const hasMultipleImages = product.images && product.images.length > 1;
         
         return `
@@ -302,7 +327,7 @@ class ProductRenderer {
 }
 
 // Global function to add to cart
-function addToCart(productId, productName, productPrice, productImage, size = 'L') {
+function addToCart(productId, productName, productPrice, productImage) {
     const product = {
         _id: productId,
         name: productName,
@@ -312,6 +337,8 @@ function addToCart(productId, productName, productPrice, productImage, size = 'L
     
     // Get selected size from the product card
     const productCard = event.target.closest('.product-card');
+    let size = 'L'; // default size
+    
     if (productCard) {
         const selectedSizeOption = productCard.querySelector('.size-option.selected');
         if (selectedSizeOption) {
@@ -341,7 +368,7 @@ async function loadFeaturedProducts() {
         }
 
         featuredGrid.innerHTML = products.map(product => 
-            ProductRenderer.renderProduct(product, addToCart)
+            ProductRenderer.renderProduct(product)
         ).join('');
 
         ProductRenderer.initializeProductGalleries();
