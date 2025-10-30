@@ -24,35 +24,62 @@ mongoose.connect(MONGODB_URI)
 // Routes
 app.use('/api/products', productRoutes);
 
-// Sample data endpoint for initial setup
-app.get('/api/sample-products', (req, res) => {
-  const sampleProducts = [
-    {
-      _id: '1',
-      name: 'BOSS Hoodie',
-      description: 'Premium BOSS hoodie with comfortable fit and iconic branding.',
-      price: 1299,
-      images: ['boss-hoodie.jpg'],
-      sizes: ['S', 'M', 'L', 'XL'],
-      category: 'hoodies',
-      inStock: true
-    },
-    {
-      _id: '2',
-      name: 'Urban Denim Jacket',
-      description: 'Classic denim jacket with modern fit, perfect for layering.',
-      price: 1199,
-      images: ['denim-jacket.jpg'],
-      sizes: ['S', 'M', 'L', 'XL'],
-      category: 'jackets',
-      inStock: true
-    }
-  ];
-  res.json(sampleProducts);
+// Serve frontend files
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// API Health Check
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Chill Wear API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Sample data for initial setup
+app.get('/api/sample-data', async (req, res) => {
+  try {
+    const sampleProducts = [
+      {
+        name: 'BOSS Hoodie',
+        description: 'Premium BOSS hoodie with comfortable fit and iconic branding.',
+        price: 1299,
+        images: ['boss-hoodie.jpg'],
+        sizes: ['S', 'M', 'L', 'XL'],
+        category: 'hoodies',
+        featured: true,
+        inStock: true
+      },
+      {
+        name: 'Urban Denim Jacket',
+        description: 'Classic denim jacket with modern fit, perfect for layering.',
+        price: 1199,
+        images: ['denim-jacket.jpg'],
+        sizes: ['S', 'M', 'L', 'XL'],
+        category: 'jackets',
+        featured: true,
+        inStock: true
+      }
+    ];
+    
+    // Insert sample products
+    const Product = mongoose.model('Product');
+    await Product.deleteMany({});
+    const insertedProducts = await Product.insertMany(sampleProducts);
+    
+    res.json({
+      message: 'Sample data inserted successfully',
+      products: insertedProducts
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📦 Sample products: http://localhost:${PORT}/api/sample-products`);
+  console.log(`🏠 Frontend: http://localhost:${PORT}`);
+  console.log(`🔧 API: http://localhost:${PORT}/api/health`);
+  console.log(`📊 Sample Data: http://localhost:${PORT}/api/sample-data`);
 });
