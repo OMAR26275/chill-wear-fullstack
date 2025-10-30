@@ -55,60 +55,6 @@ function initializeCheckoutForm() {
 
         await processOrder();
     });
-
-    // Real-time validation
-    const inputs = checkoutForm.querySelectorAll('input[required]');
-    inputs.forEach(input => {
-        input.addEventListener('blur', validateField);
-    });
-}
-
-// Validate individual field
-function validateField(e) {
-    const field = e.target;
-    const value = field.value.trim();
-    
-    field.classList.remove('error');
-    
-    if (!value) {
-        showFieldError(field, 'This field is required');
-        return false;
-    }
-
-    switch (field.id) {
-        case 'email':
-            if (!isValidEmail(value)) {
-                showFieldError(field, 'Please enter a valid email address');
-                return false;
-            }
-            break;
-        case 'phone':
-            if (!isValidPhone(value)) {
-                showFieldError(field, 'Please enter a valid phone number');
-                return false;
-            }
-            break;
-        case 'cardNumber':
-            if (!isValidCardNumber(value)) {
-                showFieldError(field, 'Please enter a valid card number');
-                return false;
-            }
-            break;
-        case 'expiryDate':
-            if (!isValidExpiryDate(value)) {
-                showFieldError(field, 'Please enter a valid expiry date (MM/YY)');
-                return false;
-            }
-            break;
-        case 'cvv':
-            if (!isValidCVV(value)) {
-                showFieldError(field, 'Please enter a valid CVV');
-                return false;
-            }
-            break;
-    }
-
-    return true;
 }
 
 // Validate entire form
@@ -118,13 +64,27 @@ function validateForm() {
     let isValid = true;
 
     inputs.forEach(input => {
-        const event = new Event('blur');
-        input.dispatchEvent(event);
-        
-        if (input.classList.contains('error')) {
+        if (!input.value.trim()) {
+            showFieldError(input, 'This field is required');
             isValid = false;
+        } else {
+            clearFieldError(input);
         }
     });
+
+    // Validate email
+    const email = document.getElementById('email');
+    if (email.value && !isValidEmail(email.value)) {
+        showFieldError(email, 'Please enter a valid email address');
+        isValid = false;
+    }
+
+    // Validate card number (simple validation)
+    const cardNumber = document.getElementById('cardNumber');
+    if (cardNumber.value && cardNumber.value.replace(/\s/g, '').length < 16) {
+        showFieldError(cardNumber, 'Please enter a valid card number');
+        isValid = false;
+    }
 
     return isValid;
 }
@@ -152,39 +112,19 @@ function showFieldError(field, message) {
     field.parentNode.appendChild(errorElement);
 }
 
+// Clear field error
+function clearFieldError(field) {
+    field.classList.remove('error');
+    const existingError = field.parentNode.querySelector('.error-message');
+    if (existingError) {
+        existingError.remove();
+    }
+}
+
 // Validation functions
 function isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
-}
-
-function isValidPhone(phone) {
-    const phoneRegex = /^\+?[\d\s-()]{10,}$/;
-    return phoneRegex.test(phone);
-}
-
-function isValidCardNumber(cardNumber) {
-    const cleaned = cardNumber.replace(/\s+/g, '');
-    return /^\d{16}$/.test(cleaned);
-}
-
-function isValidExpiryDate(expiryDate) {
-    const regex = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
-    if (!regex.test(expiryDate)) return false;
-
-    const [month, year] = expiryDate.split('/');
-    const now = new Date();
-    const currentYear = now.getFullYear() % 100;
-    const currentMonth = now.getMonth() + 1;
-
-    if (parseInt(year) < currentYear) return false;
-    if (parseInt(year) === currentYear && parseInt(month) < currentMonth) return false;
-
-    return true;
-}
-
-function isValidCVV(cvv) {
-    return /^\d{3,4}$/.test(cvv);
 }
 
 // Process order
