@@ -1,1 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Chill Wear</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-dashboard {
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        .admin-header {
+            background: #1a1a2e;
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-nav h1 {
+            color: #4cc9f0;
+        }
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            background: white;
+            padding: 0 2rem;
+            border-bottom: 1px solid #ddd;
+        }
+        .admin-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+        }
+        .admin-tab.active {
+            border-bottom-color: #4cc9f0;
+            color: #4cc9f0;
+        }
+        .admin-content {
+            padding: 2rem;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-card i {
+            font-size: 2.5rem;
+            color: #4cc9f0;
+            margin-bottom: 1rem;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1a1a2e;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            color: #666;
+        }
+        .admin-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .btn-admin {
+            background: #4cc9f0;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-admin:hover {
+            background: #3aa8c9;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-dashboard">
+        <!-- Admin Header -->
+        <header class="admin-header">
+            <div class="container admin-nav">
+                <h1><i class="fas fa-crown"></i> Chill Wear Admin</h1>
+                <div>
+                    <span>Welcome, Admin</span>
+                    <button onclick="logout()" class="btn" style="margin-left: 1rem;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
 
+        <!-- Admin Tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" onclick="showTab('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </button>
+            <button class="admin-tab" onclick="showTab('products')">
+                <i class="fas fa-tshirt"></i> Products
+            </button>
+            <button class="admin-tab" onclick="showTab('orders')">
+                <i class="fas fa-shopping-cart"></i> Orders
+            </button>
+        </div>
+
+        <!-- Admin Content -->
+        <div class="container admin-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tab-content active">
+                <h2>Dashboard Overview</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-tshirt"></i>
+                        <div class="stat-number" id="totalProducts">0</div>
+                        <div class="stat-label">Total Products</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-shopping-cart"></i>
+                        <div class="stat-number" id="totalOrders">0</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div class="stat-number" id="totalRevenue">EGP 0</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="stat-number" id="growthRate">0%</div>
+                        <div class="stat-label">Growth Rate</div>
+                    </div>
+                </div>
+
+                <div class="admin-actions">
+                    <button class="btn-admin" onclick="showTab('products')">
+                        <i class="fas fa-plus"></i> Manage Products
+                    </button>
+                    <button class="btn-admin" onclick="showTab('orders')">
+                        <i class="fas fa-eye"></i> View Orders
+                    </button>
+                </div>
+            </div>
+
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-content">
+                <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 2rem;">
+                    <h2>Product Management</h2>
+                    <button class="btn-admin" onclick="showAddProductForm()">
+                        <i class="fas fa-plus"></i> Add New Product
+                    </button>
+                </div>
+
+                <!-- Add Product Form -->
+                <div id="add-product-form" style="display: none; background: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+                    <h3>Add New Product</h3>
+                    <form id="newProductForm" enctype="multipart/form-data">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productName">Product Name *</label>
+                                <input type="text" id="productName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productPrice">Price (EGP) *</label>
+                                <input type="number" id="productPrice" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="productDescription">Description *</label>
+                            <textarea id="productDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="productCategory">Category *</label>
+                                <select id="productCategory" required>
+                                    <option value="hoodies">Hoodies</option>
+                                    <option value="jackets">Jackets</option>
+                                    <option value="tshirts">T-Shirts</option>
+                                    <option value="pants">Pants</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="productImages">Product Images</label>
+                                <input type="file" id="productImages" multiple accept="image/*">
+                            </div>
+                        </div>
+                        <div class="admin-actions">
+                            <button type="submit" class="btn-admin">Add Product</button>
+                            <button type="button" class="btn btn-outline" onclick="hideAddProductForm()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Products List -->
+                <div id="products-list">
+                    <div class="loading">Loading products...</div>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders-tab" class="tab-content">
+                <h2>Order Management</h2>
+                <div id="orders-list">
+                    <div class="loading">Loading orders...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        if (localStorage.getItem('adminAuthenticated') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+
+            // Load tab data
+            if (tabName === 'products') {
+                loadProducts();
+            } else if (tabName === 'orders') {
+                loadOrders();
+            } else if (tabName === 'dashboard') {
+                loadDashboardStats();
+            }
+        }
+
+        // Product form management
+        function showAddProductForm() {
+            document.getElementById('add-product-form').style.display = 'block';
+        }
+
+        function hideAddProductForm() {
+            document.getElementById('add-product-form').style.display = 'none';
+            document.getElementById('newProductForm').reset();
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const products = await fetch('http://localhost:5000/api/products').then(r => r.json());
+                
+                document.getElementById('totalProducts').textContent = products.length;
+                document.getElementById('totalOrders').textContent = '24'; // Mock data
+                document.getElementById('totalRevenue').textContent = 'EGP 12,450'; // Mock data
+                document.getElementById('growthRate').textContent = '+15%'; // Mock data
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Load products
+        async function loadProducts() {
+            const productsList = document.getElementById('products-list');
+            
+            try {
+                const products = await fetch('http://localhost:5000/api/products').then(r => r.json());
+                
+                if (products.length === 0) {
+                    productsList.innerHTML = '<div class="loading">No products found.</div>';
+                    return;
+                }
+
+                productsList.innerHTML = `
+                    <div class="products-grid">
+                        ${products.map(product => `
+                            <div class="product-card">
+                                <div class="product-gallery">
+                                    <img src="http://localhost:5000/uploads/${product.images && product.images[0] ? product.images[0] : ''}" 
+                                         alt="${product.name}" 
+                                         class="product-image"
+                                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-title">${product.name}</h3>
+                                    <p class="product-description">${product.description}</p>
+                                    <div class="product-price">EGP ${product.price}</div>
+                                    <div class="product-actions">
+                                        <button class="btn btn-outline" onclick="editProduct('${product._id}')">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="btn btn-danger" onclick="deleteProduct('${product._id}')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                productsList.innerHTML = '<div class="loading">Error loading products.</div>';
+                console.error('Error loading products:', error);
+            }
+        }
+
+        // Add new product
+        document.getElementById('newProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('productName').value);
+            formData.append('description', document.getElementById('productDescription').value);
+            formData.append('price', document.getElementById('productPrice').value);
+            formData.append('category', document.getElementById('productCategory').value);
+            formData.append('sizes', JSON.stringify(['S', 'M', 'L', 'XL']));
+
+            const imageInput = document.getElementById('productImages');
+            if (imageInput.files.length > 0) {
+                for (let i = 0; i < imageInput.files.length; i++) {
+                    formData.append('images', imageInput.files[i]);
+                }
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/products', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Product added successfully!');
+                    hideAddProductForm();
+                    loadProducts();
+                    loadDashboardStats();
+                } else {
+                    alert('Error adding product');
+                }
+            } catch (error) {
+                console.error('Error adding product:', error);
+                alert('Error adding product');
+            }
+        });
+
+        // Delete product
+        async function deleteProduct(productId) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Product deleted successfully!');
+                    loadProducts();
+                    loadDashboardStats();
+                } else {
+                    alert('Error deleting product');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                alert('Error deleting product');
+            }
+        }
+
+        // Edit product (placeholder)
+        function editProduct(productId) {
+            alert('Edit functionality would open a form to edit product ' + productId);
+            // In a real implementation, this would open an edit form
+        }
+
+        // Load orders (mock data)
+        function loadOrders() {
+            const ordersList = document.getElementById('orders-list');
+            
+            // Mock orders data
+            const orders = [
+                { id: 'CHW001', customer: 'John Doe', total: 'EGP 1299', status: 'Completed', date: '2023-12-01' },
+                { id: 'CHW002', customer: 'Jane Smith', total: 'EGP 899', status: 'Processing', date: '2023-12-02' },
+                { id: 'CHW003', customer: 'Mike Johnson', total: 'EGP 1598', status: 'Shipped', date: '2023-12-01' }
+            ];
+
+            ordersList.innerHTML = `
+                <div style="background: white; padding: 1.5rem; border-radius: 8px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #eee;">
+                                <th style="padding: 1rem; text-align: left;">Order ID</th>
+                                <th style="padding: 1rem; text-align: left;">Customer</th>
+                                <th style="padding: 1rem; text-align: left;">Total</th>
+                                <th style="padding: 1rem; text-align: left;">Status</th>
+                                <th style="padding: 1rem; text-align: left;">Date</th>
+                                <th style="padding: 1rem; text-align: left;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(order => `
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 1rem;">${order.id}</td>
+                                    <td style="padding: 1rem;">${order.customer}</td>
+                                    <td style="padding: 1rem;">${order.total}</td>
+                                    <td style="padding: 1rem;">
+                                        <span style="padding: 0.25rem 0.5rem; border-radius: 4px; 
+                                              background: ${order.status === 'Completed' ? '#2ecc71' : 
+                                                          order.status === 'Processing' ? '#f39c12' : '#3498db'}; 
+                                              color: white; font-size: 0.8rem;">
+                                            ${order.status}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 1rem;">${order.date}</td>
+                                    <td style="padding: 1rem;">
+                                        <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('adminAuthenticated');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardStats();
+        });
+    </script>
+</body>
+</html>
